@@ -1,11 +1,11 @@
 # GitHub_class
-1
-2
-3
-4
-5 modified by test2
-6 modified by test1 ps2
-7 modified by test2 ps3
-8 modified by test2 ps4
-9
+### goal :
+- CD workflow to GCP cloud run test
 
+set a linebot app.py
+create Dockerfile
+create .github/workflows
+
+
+# branch 
+feature/line_bot
