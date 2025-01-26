@@ -1,4 +1,5 @@
 from flask import Flask, request, abort
+from dotenv import dotenv_values
 
 from linebot.v3 import (
     WebhookHandler
@@ -20,8 +21,19 @@ from linebot.v3.webhooks import (
 
 app = Flask(__name__)
 
-configuration = Configuration(access_token='3w27mlKE0DxTHW/mzjRkJw+ORt3jW68E4dKeZhddwXaNezt/PMGrb11YYcz90cFVBTB4bjPkc3W4m2LQUt7RlSRJVB7Q+Vh+XGvL14pCGUHSCUN/wqAwIoddq7K+9YM5AOfqKnWf8rOjXbfE6jsN0wdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('b9e61a5dcb40f91b90c29947b303694e  ')
+
+# 載入 .env 檔案中的環境變數
+config = dotenv_values("./.env")
+if len(config) == 0:
+    print('please check .env path')
+
+# 讀取 LINE 的環境變數
+LINE_CHANNEL_ACCESS_TOKEN = config["LINE_CHANNEL_ACCESS_TOKEN"]
+LINE_CHANNEL_SECRET = config["LINE_CHANNEL_SECRET"]
+
+
+configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 
 @app.route("/callback", methods=['POST'])
@@ -55,4 +67,4 @@ def handle_message(event):
         )
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, host="0.0.0.0", port=5000)
