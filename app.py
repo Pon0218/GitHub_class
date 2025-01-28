@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, request, abort
 from dotenv import dotenv_values
 
@@ -26,6 +28,10 @@ app = Flask(__name__)
 config = dotenv_values("./.env")
 if len(config) == 0:
     print('please check .env path')
+
+# GitHub action secret ENV 代換
+config['LINE_CHANNEL_SECRET'] = os.getenv('LINE_CHANNEL_SECRET', config.get('LINE_CHANNEL_SECRET'))
+config['LINE_CHANNEL_ACCESS_TOKEN'] = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', config.get('LINE_CHANNEL_ACCESS_TOKEN'))
 
 # 讀取 LINE 的環境變數
 LINE_CHANNEL_ACCESS_TOKEN = config["LINE_CHANNEL_ACCESS_TOKEN"]
@@ -67,4 +73,4 @@ def handle_message(event):
         )
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000)
