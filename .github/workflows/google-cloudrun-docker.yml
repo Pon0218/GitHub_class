@@ -35,10 +35,10 @@ on:
       - '"main"'
 
 env:
-  PROJECT_ID: 'cogent-tree-447101-m8' # TODO: update to your Google Cloud project ID
+  PROJECT_ID: 'github-action-449507' # TODO: update to your Google Cloud project ID
   REGION: 'us-central1' # TODO: update to your region
-  SERVICE: 'my-service' # TODO: update to your service name
-  WORKLOAD_IDENTITY_PROVIDER: 'https://iam.googleapis.com/projects/491257915749/locations/global/workloadIdentityPools/github/providers/simongood' # TODO: update to your workload identity provider
+  SERVICE: 'github-class-gcp-run' # TODO: update to your service name
+  WORKLOAD_IDENTITY_PROVIDER: 'principal://iam.googleapis.com/projects/726618971099/locations/global/workloadIdentityPools/github-pool/subject/SUBJECT_ATTRIBUTE_VALUE' # TODO: update to your workload identity provider
 
 jobs:
   deploy:
