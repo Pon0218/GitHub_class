@@ -37,7 +37,7 @@ on:
 env:
   PROJECT_ID: 'github-action-449507' # TODO: update to your Google Cloud project ID
   REGION: 'us-central1' # TODO: update to your region
-  SERVICE: 'github-class-gcp-run' # TODO: update to your service name
+  SERVICE: 'github-class-workflows-gar' # TODO: update to your service name ; 這裡預設 GAR 與 GCP run 同名簡化設定
   WORKLOAD_IDENTITY_PROVIDER: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
 
 jobs:
