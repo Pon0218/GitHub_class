@@ -36,7 +36,7 @@ on:
 env:
   PROJECT_ID: 'algebraic-inn-443509-f2'    # TODO: update to your Google Cloud project ID
   REGION: 'us-central1'                    # TODO: update to your region
-  SERVICE: 'github-auto'              # TODO: update to your service name >Artifact Registry存放區名稱
+  SERVICE: 'github-auto'              # TODO: update to your service name
   WORKLOAD_IDENTITY_PROVIDER: 'projects/235896956679/locations/global/workloadIdentityPools/github/providers/my-repo'  # TODO: update to your workload identity provider
 
 jobs:
