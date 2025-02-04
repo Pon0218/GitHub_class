@@ -1,25 +1,33 @@
-# 使用 Python 3.12 版本的基本映像
-FROM python:3.12.8-slim-bookworm
+# gunicorn需要先載入並更新requirements.txt
 
-# 設置工作目錄
+FROM python:3.12-slim
+
 WORKDIR /app
 
-# 複製依賴檔案
-COPY requirements.txt ./
+# 安裝必要的系統依賴，包括 fontconfig
+RUN apt-get update && apt-get install -y fontconfig
 
-# 設置環境變數
-ENV TZ=Asia/Taipei \
-    LANG=C.UTF-8 \
-    PYTHONUNBUFFERED=1
+# 安裝 poetry
+RUN pip install --no-cache-dir poetry
 
-# 安裝所有依賴項、gunicorn
-RUN apt update && \
-    pip3 install -r requirements.txt gunicorn
+# 複製所有檔案
+COPY . .
 
-# ----------------------------------------------------------------
+# 拷貝字型檔案到容器中的適當目錄
+COPY data/fonts/mingliu.ttc /app/data/fonts/mingliu.ttc
 
-# 複製應用程式源代碼
-COPY . ./
+# 安裝 Python 依賴
+RUN poetry install --no-interaction --no-ansi --no-root
+RUN poetry add gunicorn==23.0.0
 
-# 設置容器的啟動命令，使用 gunicorn WSGI HTTP 服務器部署應用並設置端口為 5000 (--workers1 --threads 1 讓 GCP 自行擴展即可)
-CMD ["bash", "-c", "gunicorn app:app -b :${PORT:-5000} --workers ${WORKERS:-1} --threads ${THREADS:-1}"]
+# 設定環境變數
+ENV PYTHONUNBUFFERED=1
+
+# 為 Cloud Run 設定動態端口
+ENV PORT=8080
+
+# 暴露端口
+EXPOSE ${PORT}
+
+# 使用 gunicorn 執行應用程式
+CMD exec poetry run gunicorn --workers=2 --threads=8 --timeout=0 --bind=:${PORT} app:app
