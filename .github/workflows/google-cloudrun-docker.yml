@@ -26,7 +26,6 @@
 #    https://cloud.google.com/iam/docs/manage-access-other-resources
 #
 # 3. Change the values in the "env" block to match your values.
-
 name: 'Build and Deploy to Cloud Run'
 
 on:
@@ -50,16 +49,16 @@ jobs:
 
     steps:
       - name: 'Checkout'
-        uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332' # actions/checkout@v4
+        uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332'
 
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
+        uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2'
         with:
           workload_identity_provider: '${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
 
       - name: 'Docker Auth'
-        uses: 'docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567' # docker/login-action@v3
+        uses: 'docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567'
         with:
           username: 'oauth2accesstoken'
           password: '${{ steps.auth.outputs.auth_token }}'
@@ -81,5 +80,3 @@ jobs:
       - name: 'Show output'
         run: |
           echo ${{ steps.deploy.outputs.url }}
-
-gcloud iam workload-identity-pools create "github" \ --project="algebraic-inn-443509-f2" \ --location="global" \ --display-name="GitHub Actions Pool"
