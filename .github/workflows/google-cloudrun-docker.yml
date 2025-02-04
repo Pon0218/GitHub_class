@@ -35,10 +35,10 @@ on:
       - 'main'
 
 env:
-  PROJECT_ID: 'my-project' # TODO: update to your Google Cloud project ID
-  REGION: 'us-central1' # TODO: update to your region
-  SERVICE: 'my-service' # TODO: update to your service name
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider' # TODO: update to your workload identity provider
+  PROJECT_ID: 'algebraic-inn-443509-f2'    # TODO: update to your Google Cloud project ID
+  REGION: 'us-central1'                    # TODO: update to your region
+  SERVICE: 'My First Project'              # TODO: update to your service name
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/235896956679/locations/global/workloadIdentityPools/github/providers/my-repo'  # TODO: update to your workload identity provider
 
 jobs:
   deploy:
@@ -93,3 +93,6 @@ jobs:
         run: |2-
 
           echo ${{ steps.deploy.outputs.url }}
+
+
+gcloud iam workload-identity-pools create "github" \ --project="algebraic-inn-443509-f2" \ --location="global" \ --display-name="GitHub Actions Pool"
