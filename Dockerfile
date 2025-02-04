@@ -13,9 +13,6 @@ RUN pip install --no-cache-dir poetry
 # 複製所有檔案
 COPY . .
 
-# 拷貝字型檔案到容器中的適當目錄
-COPY data/fonts/mingliu.ttc /app/data/fonts/mingliu.ttc
-
 # 安裝 Python 依賴
 RUN poetry install --no-interaction --no-ansi --no-root
 RUN poetry add gunicorn==23.0.0
