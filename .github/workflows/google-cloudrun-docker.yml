@@ -44,8 +44,11 @@ jobs:
           
       - name: 'Build and Push Container'
         run: |-
-          docker build -t "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}" .
-          docker push "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}"
+          IMAGE_NAME="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/app:${{ github.sha }}"
+          echo "Building image: ${IMAGE_NAME}"
+          docker build -t "${IMAGE_NAME}" .
+          echo "Pushing image: ${IMAGE_NAME}"
+          docker push "${IMAGE_NAME}"
 
       - name: 'Deploy to Cloud Run'
         id: deploy
@@ -53,7 +56,7 @@ jobs:
         with:
           service: '${{ env.SERVICE }}'
           region: '${{ env.REGION }}'
-          image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}'
+          image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/app:${{ github.sha }}'
 
       - name: 'Show Output'
         run: 'echo ${{ steps.deploy.outputs.url }}'
