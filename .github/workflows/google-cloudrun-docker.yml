@@ -6,10 +6,10 @@ on:
       - 'main'
 
 env:
-  PROJECT_ID: 'github-auto'    # TODO: update to your Google Cloud project ID
+  PROJECT_ID: 'action-450507'    # TODO: update to your Google Cloud project ID
   REGION: 'us-central1'                    # TODO: update to your region
-  SERVICE: 'auto-image'              # TODO: update to your service name
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/822734733444/locations/global/workloadIdentityPools/auto-build/providers/ponpon'  # TODO: update to your workload identity provider
+  SERVICE: 'github-auto'              # TODO: update to your service name
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/733182017872/locations/global/workloadIdentityPools/auto-build/providers/ponpon'  # TODO: update to your workload identity provider
 
 jobs:
   deploy:
