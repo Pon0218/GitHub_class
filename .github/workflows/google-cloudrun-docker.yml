@@ -9,7 +9,6 @@ env:
   PROJECT_ID: 'action-450507'
   REGION: 'us-central1'
   SERVICE: 'github-auto'
-  REPOSITORY: 'github-auto'    # 新增倉庫名稱
   WORKLOAD_IDENTITY_PROVIDER: 'projects/733182017872/locations/global/workloadIdentityPools/auto-build/providers/ponpon'
 
 jobs:
@@ -22,35 +21,65 @@ jobs:
 
     steps:
       - name: 'Checkout'
-        uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332'
+        uses: 'actions/checkout@v4'
+
+      - name: 'Debug - Show Environment'
+        run: |
+          echo "Project ID: ${{ env.PROJECT_ID }}"
+          echo "Region: ${{ env.REGION }}"
+          echo "Service: ${{ env.SERVICE }}"
+          echo "Workload Identity Provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}"
 
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2'
+        uses: 'google-github-actions/auth@v2'
         with:
           workload_identity_provider: '${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
-          project_id: '${{ env.PROJECT_ID }}'
+          service_account: 'github-action@action-450507.iam.gserviceaccount.com'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Debug - Check Authentication'
+        run: |
+          echo "Checking gcloud auth..."
+          gcloud auth list
+          echo "Checking project configuration..."
+          gcloud config list
+          echo "Checking Artifact Registry access..."
+          gcloud artifacts repositories list --location=${{ env.REGION }}
 
       - name: 'Docker Auth'
-        uses: 'docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567'
+        id: docker-auth
+        uses: 'docker/login-action@v3'
         with:
           username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.access_token }}'  # 修改為 access_token
+          password: '${{ steps.auth.outputs.access_token }}'
           registry: '${{ env.REGION }}-docker.pkg.dev'
+
+      - name: 'Debug - Check Docker'
+        run: |
+          echo "Checking Docker configuration..."
+          docker info
+          echo "Listing Docker images..."
+          docker images
 
       - name: 'Build and Push Container'
         run: |-
-          DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
+          set -x
+          DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}"
+          echo "Building image: ${DOCKER_TAG}"
           docker build --tag "${DOCKER_TAG}" .
+          echo "Pushing image: ${DOCKER_TAG}"
           docker push "${DOCKER_TAG}"
 
       - name: 'Deploy to Cloud Run'
-        uses: 'google-github-actions/deploy-cloudrun@33553064113a37d688aa6937bacbdc481580be17'
+        id: deploy
+        uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
           service: '${{ env.SERVICE }}'
           region: '${{ env.REGION }}'
-          image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}'
+          image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}'
 
-      - name: 'Show output'
-        run: |
-          echo ${{ steps.deploy.outputs.url }}
+      - name: 'Show Output'
+        run: 'echo ${{ steps.deploy.outputs.url }}'
