@@ -23,55 +23,29 @@ jobs:
       - name: 'Checkout'
         uses: 'actions/checkout@v4'
 
-      - name: 'Debug - Show Environment'
-        run: |
-          echo "Project ID: ${{ env.PROJECT_ID }}"
-          echo "Region: ${{ env.REGION }}"
-          echo "Service: ${{ env.SERVICE }}"
-          echo "Workload Identity Provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}"
-
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2'
         with:
           workload_identity_provider: '${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
           service_account: 'github-action@action-450507.iam.gserviceaccount.com'
-
+          token_format: 'access_token'
+          create_credentials_file: true
+          
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
-
-      - name: 'Debug - Check Authentication'
-        run: |
-          echo "Checking gcloud auth..."
-          gcloud auth list
-          echo "Checking project configuration..."
-          gcloud config list
-          echo "Checking Artifact Registry access..."
-          gcloud artifacts repositories list --location=${{ env.REGION }}
-
-      - name: 'Docker Auth'
-        id: docker-auth
-        uses: 'docker/login-action@v3'
         with:
-          username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.access_token }}'
-          registry: '${{ env.REGION }}-docker.pkg.dev'
-
-      - name: 'Debug - Check Docker'
-        run: |
-          echo "Checking Docker configuration..."
-          docker info
-          echo "Listing Docker images..."
-          docker images
-
+          project_id: '${{ env.PROJECT_ID }}'
+          install_components: 'gke-gcloud-auth-plugin'
+          
+      - name: 'Configure Docker'
+        run: |-
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+          
       - name: 'Build and Push Container'
         run: |-
-          set -x
-          DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}"
-          echo "Building image: ${DOCKER_TAG}"
-          docker build --tag "${DOCKER_TAG}" .
-          echo "Pushing image: ${DOCKER_TAG}"
-          docker push "${DOCKER_TAG}"
+          docker build -t "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}" .
+          docker push "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}"
 
       - name: 'Deploy to Cloud Run'
         id: deploy
