@@ -6,10 +6,11 @@ on:
       - 'main'
 
 env:
-  PROJECT_ID: 'action-450507'    # TODO: update to your Google Cloud project ID
-  REGION: 'us-central1'                    # TODO: update to your region
-  SERVICE: 'github-auto'              # TODO: update to your service name
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/733182017872/locations/global/workloadIdentityPools/auto-build/providers/ponpon'  # TODO: update to your workload identity provider
+  PROJECT_ID: 'action-450507'
+  REGION: 'us-central1'
+  SERVICE: 'github-auto'
+  REPOSITORY: 'github-auto'    # 新增倉庫名稱
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/733182017872/locations/global/workloadIdentityPools/auto-build/providers/ponpon'
 
 jobs:
   deploy:
@@ -28,17 +29,18 @@ jobs:
         uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2'
         with:
           workload_identity_provider: '${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
+          project_id: '${{ env.PROJECT_ID }}'
 
       - name: 'Docker Auth'
         uses: 'docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567'
         with:
           username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.auth_token }}'
+          password: '${{ steps.auth.outputs.access_token }}'  # 修改為 access_token
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
       - name: 'Build and Push Container'
         run: |-
-          DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}"
+          DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
           docker build --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
 
@@ -47,7 +49,7 @@ jobs:
         with:
           service: '${{ env.SERVICE }}'
           region: '${{ env.REGION }}'
-          image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}'
+          image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}'
 
       - name: 'Show output'
         run: |
